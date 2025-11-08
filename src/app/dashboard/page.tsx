@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'next/link'
+import Link from 'next/link'
 import { apiClient } from '@/lib/api'
 import { ConversationStats, MessageStats } from '@/types'
 
