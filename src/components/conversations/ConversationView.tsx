@@ -120,9 +120,9 @@ export default function ConversationView({ conversationId }: ConversationViewPro
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#efeae2]">
-      {/* Header */}
-      <div className="bg-[#f0f2f5] border-b border-gray-300 px-4 py-3 shadow-sm">
+    <div className="flex flex-col h-full bg-[#efeae2] relative">
+      {/* Header - Fixed height */}
+      <div className="bg-[#f0f2f5] border-b border-gray-300 px-4 py-3 shadow-sm flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Avatar
@@ -150,12 +150,13 @@ export default function ConversationView({ conversationId }: ConversationViewPro
         </div>
       </div>
 
-      {/* Messages Container with WhatsApp-style background */}
+      {/* Messages Container with WhatsApp-style background - Takes remaining space minus input height */}
       <div
         className="flex-1 overflow-y-auto px-4 sm:px-8 md:px-12 lg:px-16 py-4 flex flex-col"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d9d9d9' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           backgroundColor: '#efeae2',
+          paddingBottom: '80px', // Space for fixed input at bottom
         }}
         onScroll={handleScroll}
       >
@@ -175,7 +176,7 @@ export default function ConversationView({ conversationId }: ConversationViewPro
           </div>
         ) : (
           <>
-            <div className="flex-1"></div>
+            <div className="flex-1 min-h-0"></div>
             <div className="space-y-2 py-2">
               {sortedMessages.map((message) => (
                 <MessageBubble
@@ -190,8 +191,8 @@ export default function ConversationView({ conversationId }: ConversationViewPro
         )}
       </div>
 
-      {/* Message Input */}
-      <div className="bg-[#f0f2f5] border-t border-gray-300 px-4 py-3">
+      {/* Message Input - Fixed at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 bg-[#f0f2f5] border-t border-gray-300 px-4 py-3 flex-shrink-0">
         <MessageInput
           onSend={handleSendMessage}
           disabled={sendMessageMutation.isPending || conversation.status === 'ARCHIVED'}
