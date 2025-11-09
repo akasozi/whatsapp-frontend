@@ -1,11 +1,11 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+// import { Inter } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import { Providers } from '@/components/providers/Providers'
 import AuthProviderWrapper from '@/components/providers/AuthProvider'
 
-const inter = Inter({ subsets: ['latin'] })
+// const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'WhatsApp Chatbot Admin',
@@ -20,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className="font-sans">
         <Providers>
           <AuthProviderWrapper>
             {children}
