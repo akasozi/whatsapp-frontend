@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { apiClient } from '@/lib/api'
-import { ConversationStats, MessageStats } from '@/types'
+import { ConversationStats, MessageStats } from '@/lib/api'
 
 export default function DashboardPage() {
   const { data: conversationStats } = useQuery({
@@ -55,116 +55,81 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6">
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="mt-2 text-gray-600">
-          Monitor your WhatsApp chatbot performance and conversation activity
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600">Monitor your WhatsApp chatbot performance</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat) => (
-          <div
-            key={stat.name}
-            className="bg-white overflow-hidden shadow rounded-lg"
-          >
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className={`h-12 w-12 ${stat.color} rounded-lg flex items-center justify-center text-white text-2xl font-bold`}>
-                    {stat.icon}
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      {stat.name}
-                    </dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
-                        {stat.value}
-                      </div>
-                      <div
-                        className={`ml-2 flex items-baseline text-sm font-semibold ${
-                          stat.changeType === 'positive'
-                            ? 'text-green-600'
-                            : 'text-red-600'
-                        }`}
-                      >
-                        {stat.change}
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
+          <div key={stat.name} className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className={`p-3 rounded-full ${stat.color} text-white mr-4`}>
+                <span className="text-2xl">{stat.icon}</span>
               </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">{stat.name}</p>
+                <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                stat.changeType === 'positive' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
+                {stat.change}
+              </span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white shadow rounded-lg mb-8">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="space-y-3">
             <Link
               href="/dashboard/conversations"
-              className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+              className="block w-full text-left px-4 py-3 bg-whatsapp-50 text-whatsapp-700 rounded-lg hover:bg-whatsapp-100 transition-colors"
             >
-              <div className="text-4xl mb-2">💬</div>
-              <h4 className="text-base font-medium text-gray-900">View Conversations</h4>
-              <p className="text-sm text-gray-500 mt-1">
-                Monitor and manage active conversations
-              </p>
+              <div className="flex items-center">
+                <span className="mr-3">💬</span>
+                View All Conversations
+              </div>
             </Link>
-
-            <Link
-              href="/dashboard/analytics"
-              className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-150"
-            >
-              <div className="text-4xl mb-2">📊</div>
-              <h4 className="text-base font-medium text-gray-900">Analytics</h4>
-              <p className="text-sm text-gray-500 mt-1">
-                View detailed performance metrics
-              </p>
-            </Link>
-
-            <Link
-              href="/dashboard/settings"
-              className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-150"
-            >
-              <div className="text-4xl mb-2">⚙️</div>
-              <h4 className="text-base font-medium text-gray-900">Settings</h4>
-              <p className="text-sm text-gray-500 mt-1">
-                Configure chatbot and API settings
-              </p>
-            </Link>
+            <button className="w-full text-left px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
+              <div className="flex items-center">
+                <span className="mr-3">📊</span>
+                View Analytics
+              </div>
+            </button>
+            <button className="w-full text-left px-4 py-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+              <div className="flex items-center">
+                <span className="mr-3">⚙️</span>
+                Settings
+              </div>
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Recent Activity
-          </h3>
-          <div className="text-center py-8">
-            <div className="text-6xl mb-2">💬</div>
-            <p className="mt-2 text-sm text-gray-500">
-              3 conversation(s) processed
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/dashboard/conversations"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              >
-                View All Conversations
-              </Link>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+          <div className="space-y-3">
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+              <span className="text-gray-600">New conversation started</span>
+              <span className="ml-auto text-gray-500">2m ago</span>
+            </div>
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+              <span className="text-gray-600">Message sent successfully</span>
+              <span className="ml-auto text-gray-500">5m ago</span>
+            </div>
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
+              <span className="text-gray-600">Bot response generated</span>
+              <span className="ml-auto text-gray-500">12m ago</span>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Message } from '@/types';
+import { Message } from '@/lib/api';
 import { format } from 'date-fns';
 
 interface MessageBubbleProps {

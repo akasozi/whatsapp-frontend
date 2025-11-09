@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Conversation, Message } from '@/types';
+import { Conversation, Message } from '@/lib/api';
 import { apiClient } from '@/lib/api';
 import MessageBubble from '@/components/ui/MessageBubble';
 import MessageInput from '@/components/ui/MessageInput';

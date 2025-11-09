@@ -1,5 +1,5 @@
 import React from 'react';
-import { Conversation } from '@/types';
+import { Conversation } from '@/lib/api';
 import { format, formatDistanceToNow } from 'date-fns';
 import Avatar from './Avatar';
 
