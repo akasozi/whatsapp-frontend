@@ -32,8 +32,8 @@ export default function MessageInput({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-gray-200 bg-white p-4">
-      <div className="flex items-end space-x-3">
+    <form onSubmit={handleSubmit} className="w-full">
+      <div className="flex items-end space-x-2">
         <div className="flex-1">
           <textarea
             value={message}
@@ -42,8 +42,8 @@ export default function MessageInput({
             placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-500 focus:ring-whatsapp-500 resize-none disabled:bg-gray-50 disabled:text-gray-500"
-            style={{ minHeight: '40px', maxHeight: '120px' }}
+            className="block w-full rounded-lg bg-white border border-gray-300 px-4 py-2.5 text-[15px] focus:border-whatsapp-500 focus:ring-1 focus:ring-whatsapp-500 resize-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+            style={{ minHeight: '42px', maxHeight: '120px' }}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement;
               target.style.height = 'auto';
@@ -54,7 +54,7 @@ export default function MessageInput({
         <button
           type="submit"
           disabled={disabled || !message.trim()}
-          className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-whatsapp-500 text-white hover:bg-whatsapp-600 focus:outline-none focus:ring-2 focus:ring-whatsapp-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center justify-center h-[42px] w-[42px] rounded-full bg-whatsapp-500 text-white hover:bg-whatsapp-600 focus:outline-none focus:ring-2 focus:ring-whatsapp-500 focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
         >
           <PaperAirplaneIcon className="h-5 w-5" />
         </button>

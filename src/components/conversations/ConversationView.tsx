@@ -113,77 +113,87 @@ export default function ConversationView({ conversationId }: ConversationViewPro
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-[#efeae2]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-[#f0f2f5] border-b border-gray-300 px-4 py-3 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <Avatar
               name={conversation.user?.full_name}
               phoneNumber={conversation.user?.phone_number}
               size="lg"
             />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-base font-medium text-gray-900">
                 {conversation.user?.full_name || 'Unknown User'}
               </h2>
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <PhoneIcon className="h-4 w-4" />
+              <div className="flex items-center space-x-2 text-xs text-gray-500">
+                <PhoneIcon className="h-3 w-3" />
                 <span>{conversation.user?.phone_number}</span>
-                <span className="mx-2">•</span>
+                <span className="mx-1">•</span>
                 <span className={`font-medium ${getStatusColor(conversation.status)}`}>
                   {conversation.status}
                 </span>
               </div>
             </div>
           </div>
-          <button className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
-            <EllipsisVerticalIcon className="h-6 w-6" />
+          <button className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-200/50 transition-colors">
+            <EllipsisVerticalIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
 
-      {/* Messages */}
+      {/* Messages Container with WhatsApp-style background */}
       <div
-        className="flex-1 overflow-y-auto px-6 py-4 space-y-2"
+        className="flex-1 overflow-y-auto px-4 sm:px-8 md:px-12 lg:px-16 py-4"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d9d9d9' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundColor: '#efeae2',
+        }}
         onScroll={handleScroll}
       >
-        {messagesLoading && sortedMessages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-whatsapp-500 mx-auto"></div>
-              <p className="mt-2 text-sm text-gray-500">Loading messages...</p>
+        <div className="flex flex-col justify-end min-h-full">
+          {messagesLoading && sortedMessages.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-whatsapp-500 mx-auto"></div>
+                <p className="mt-2 text-sm text-gray-500">Loading messages...</p>
+              </div>
             </div>
-          </div>
-        ) : sortedMessages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <p className="text-gray-500">No messages yet</p>
-              <p className="text-sm text-gray-400 mt-1">Start the conversation below</p>
+          ) : sortedMessages.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center bg-white/60 backdrop-blur-sm rounded-lg px-6 py-4 border border-gray-200 shadow-sm">
+                <p className="text-gray-600 font-medium">No messages yet</p>
+                <p className="text-sm text-gray-500 mt-1">Start the conversation below</p>
+              </div>
             </div>
-          </div>
-        ) : (
-          sortedMessages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              isOwn={message.source === 'AGENT' || message.source === 'BOT'}
-            />
-          ))
-        )}
-        <div ref={messagesEndRef} />
+          ) : (
+            <div className="space-y-2 py-2">
+              {sortedMessages.map((message) => (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  isOwn={message.source === 'AGENT' || message.source === 'BOT'}
+                />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Message Input */}
-      <MessageInput
-        onSend={handleSendMessage}
-        disabled={sendMessageMutation.isPending || conversation.status === 'ARCHIVED'}
-        placeholder={
-          conversation.status === 'ARCHIVED'
-            ? 'This conversation is archived'
-            : 'Type a message...'
-        }
-      />
+      <div className="bg-[#f0f2f5] border-t border-gray-300 px-4 py-3">
+        <MessageInput
+          onSend={handleSendMessage}
+          disabled={sendMessageMutation.isPending || conversation.status === 'ARCHIVED'}
+          placeholder={
+            conversation.status === 'ARCHIVED'
+              ? 'This conversation is archived'
+              : 'Type a message...'
+          }
+        />
+      </div>
     </div>
   );
 }
