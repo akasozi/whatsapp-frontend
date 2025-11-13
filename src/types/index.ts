@@ -111,6 +111,10 @@ export interface Document {
   created_at: string
   updated_at: string
   uploader_name?: string
+  metadata?: {
+    title?: string
+    [key: string]: any
+  }
 }
 
 export interface DocumentChunk {

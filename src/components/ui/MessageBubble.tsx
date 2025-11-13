@@ -102,12 +102,12 @@ export default function MessageBubble({
                   src={message.media_url}
                   alt="Message attachment"
                   className="rounded-md max-w-full h-auto cursor-pointer"
-                  onClick={() => handlePreview(message.id || '', 'image')}
+                  onClick={() => handlePreview(String(message.id), 'image')}
                 />
                 {isAdmin && (
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <button
-                      onClick={() => handleMessageDownload(message.id || '', message.media_filename || 'image.jpg')}
+                      onClick={() => handleMessageDownload(String(message.id), message.media_filename || 'image.jpg')}
                       className="bg-white rounded-full p-2 shadow-lg transform scale-90 group-hover:scale-100 transition-transform"
                     >
                       <ArrowDownTrayIcon className="h-4 w-4 text-gray-700" />
@@ -132,7 +132,7 @@ export default function MessageBubble({
               </div>
               {isAdmin && (
                 <button
-                  onClick={() => handleMessageDownload(message.id || '', message.media_filename || 'document.pdf')}
+                  onClick={() => handleMessageDownload(String(message.id), message.media_filename || 'document.pdf')}
                   className="flex-shrink-0 p-1 text-gray-600 hover:text-whatsapp-600 transition-colors"
                 >
                   <ArrowDownTrayIcon className="h-4 w-4" />
@@ -148,7 +148,7 @@ export default function MessageBubble({
               <span className="text-sm flex-1">Voice message</span>
               {isAdmin && message.media_filename && (
                 <button
-                  onClick={() => handleMessageDownload(message.id || '', message.media_filename)}
+                  onClick={() => handleMessageDownload(String(message.id), message.media_filename)}
                   className="flex-shrink-0 p-1 text-gray-600 hover:text-whatsapp-600 transition-colors"
                 >
                   <ArrowDownTrayIcon className="h-4 w-4" />
@@ -166,7 +166,7 @@ export default function MessageBubble({
                 {isAdmin && (
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <button
-                      onClick={() => handleMessageDownload(message.id || '', message.media_filename || 'video.mp4')}
+                      onClick={() => handleMessageDownload(String(message.id), message.media_filename || 'video.mp4')}
                       className="bg-white rounded-full p-2 shadow-lg transform scale-90 group-hover:scale-100 transition-transform"
                     >
                       <ArrowDownTrayIcon className="h-4 w-4 text-gray-700" />
