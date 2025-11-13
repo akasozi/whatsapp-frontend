@@ -1,4 +1,26 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
+import type {
+  AuthTokens,
+  LoginCredentials,
+  User,
+  Message,
+  Conversation,
+  SendMessageRequest,
+  ConversationStats,
+  MessageStats,
+  AttachmentData,
+  AttachmentUploadResponse,
+  MessageTemplate,
+  MessageTemplateCreate,
+  MessageTemplateUpdate,
+  TemplateApplicationRequest,
+  TemplateApplicationResponse,
+  AdminStats,
+  BroadcastMessageRequest,
+  BroadcastResult,
+  UserSearchResponse,
+  AdminMessageMetadata
+} from '@/types'
 
 // Type definitions
 interface AuthTokens {
@@ -57,6 +79,26 @@ interface SendMessageRequest {
   conversation_id: number
   content: string
   message_type?: string
+  media_url?: string
+  media_filename?: string
+  attachments?: AttachmentData[]
+}
+
+interface AttachmentData {
+  attachment_id: number
+  filename: string
+  mime_type: string
+  file_size: number
+  download_url: string
+}
+
+interface AttachmentUploadResponse {
+  message: string
+  attachment_id: number
+  filename: string
+  file_size: number
+  mime_type: string
+  download_url: string
 }
 
 interface ConversationStats {
@@ -177,45 +219,53 @@ class ApiClient {
     // Transform backend response to match frontend expected structure
     return response.data.map((conv: any) => ({
       id: conv.id,
-      session_id: `session_${conv.id}`, // Generate session_id
-      user_id: conv.id, // Use conversation ID as user_id
+      session_id: conv.session_id || `session_${conv.id}`,
+      user_id: conv.user_id,
       status: conv.status as 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ARCHIVED',
-      assigned_agent_id: undefined,
-      last_message_at: conv.last_message_at || conv.messages?.[conv.messages.length - 1]?.created_at,
-      created_at: conv.created_at || new Date().toISOString(),
-      updated_at: conv.updated_at || new Date().toISOString(),
+      assigned_agent_id: conv.assigned_agent_id,
+      last_message_at: conv.last_message_at,
+      created_at: conv.created_at,
+      updated_at: conv.updated_at,
       user: {
-        id: conv.id,
-        phone_number: conv.user_phone,
-        full_name: conv.username,
+        id: conv.user_id,
+        phone_number: conv.user_phone || 'Unknown', // Use actual user phone from backend
+        full_name: conv.user_name || 'WhatsApp User', // Use actual user name from backend
         email: undefined,
         role: 'USER' as const,
         is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        created_at: conv.created_at,
+        updated_at: conv.updated_at
       },
-      messages: conv.messages?.map((msg: any) => ({
-        id: msg.id,
-        conversation_id: conv.id,
-        sender_id: undefined,
-        direction: msg.direction as 'INBOUND' | 'OUTBOUND',
-        message_type: 'TEXT' as const,
-        content: msg.content,
-        external_message_id: undefined,
-        media_url: undefined,
-        media_filename: undefined,
-        has_attachments: false,
-        message_metadata: {},
-        source: msg.direction === 'INBOUND' ? 'USER' : 'BOT',
-        created_at: msg.created_at,
-        updated_at: msg.created_at
-      })) || []
+      messages: [] // Empty array for now, will be loaded separately
     }))
   }
 
   async getConversation(conversationId: number): Promise<Conversation> {
     const response = await this.client.get(`/api/v1/conversations/${conversationId}`)
-    return response.data
+
+    // Transform backend response to match frontend expected structure
+    const conv = response.data
+    return {
+      id: conv.id,
+      session_id: conv.session_id || `session_${conv.id}`,
+      user_id: conv.user_id,
+      status: conv.status as 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ARCHIVED',
+      assigned_agent_id: conv.assigned_agent_id,
+      last_message_at: conv.last_message_at,
+      created_at: conv.created_at,
+      updated_at: conv.updated_at,
+      user: {
+        id: conv.user_id,
+        phone_number: conv.user_phone || 'Unknown', // Use actual user phone from backend
+        full_name: conv.user_name || 'WhatsApp User', // Use actual user name from backend
+        email: undefined,
+        role: 'USER' as const,
+        is_active: true,
+        created_at: conv.created_at,
+        updated_at: conv.updated_at
+      },
+      messages: conv.messages || [] // Include messages if available
+    }
   }
 
   async getConversationStats(): Promise<ConversationStats> {
@@ -250,9 +300,250 @@ class ApiClient {
     return response.data
   }
 
+  // AI Assistant endpoints
+  async askAIAssistant(question: string, sessionId?: string): Promise<any> {
+    const response = await this.client.post('/api/v1/ai-assistant/chat', {
+      question,
+      session_id: sessionId
+    })
+    return response.data
+  }
+
+  async getSuggestedQuestions(category?: string): Promise<any> {
+    const params = category ? { category } : {}
+    const response = await this.client.get('/api/v1/ai-assistant/suggested-questions', { params })
+    return response.data
+  }
+
+  async getConversationSummary(conversationId: number): Promise<any> {
+    const response = await this.client.get(`/api/v1/ai-assistant/conversation/${conversationId}/summary`)
+    return response.data
+  }
+
+  async performSentimentAnalysis(days: number = 7): Promise<any> {
+    const response = await this.client.post('/api/v1/ai-assistant/analytics/sentiment', {
+      scope: 'all',
+      days,
+      include_details: true
+    })
+    return response.data
+  }
+
+  async performTopicAnalysis(days: number = 7): Promise<any> {
+    const response = await this.client.post('/api/v1/ai-assistant/analytics/topics', {
+      scope: 'time_period',
+      days,
+      max_topics: 10,
+      include_trends: true
+    })
+    return response.data
+  }
+
+  async analyzeUserBehavior(userIdentifier?: string, days: number = 30): Promise<any> {
+    const response = await this.client.post('/api/v1/ai-assistant/analytics/user-behavior', {
+      user_identifier: userIdentifier,
+      scope: userIdentifier ? 'specific_user' : 'overall',
+      days,
+      include_predictions: true
+    })
+    return response.data
+  }
+
+  async performCustomAnalytics(query: string, days: number = 7): Promise<any> {
+    const response = await this.client.post('/api/v1/ai-assistant/analytics/custom', {
+      query,
+      time_period_days: days,
+      include_recommendations: true
+    })
+    return response.data
+  }
+
+  async getSystemHealth(hours: number = 24): Promise<any> {
+    const response = await this.client.get('/api/v1/ai-assistant/system/health', {
+      params: { hours }
+    })
+    return response.data
+  }
+
+  async getAIAssistantCapabilities(): Promise<any> {
+    const response = await this.client.get('/api/v1/ai-assistant/capabilities')
+    return response.data
+  }
+
+  // Attachment endpoints
+  async uploadAttachment(file: File): Promise<AttachmentUploadResponse> {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await this.client.post('/api/v1/attachments/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  }
+
+  async downloadAttachment(attachmentId: string): Promise<Blob> {
+    const response = await this.client.get(`/api/v1/attachments/${attachmentId}/download`, {
+      responseType: 'blob',
+    })
+    return response.data
+  }
+
+  async previewAttachment(attachmentId: string): Promise<Blob> {
+    const response = await this.client.get(`/api/v1/attachments/${attachmentId}/preview`, {
+      responseType: 'blob',
+    })
+    return response.data
+  }
+
+  async getAttachment(attachmentId: string): Promise<any> {
+    const response = await this.client.get(`/api/v1/attachments/${attachmentId}`)
+    return response.data
+  }
+
+  async getMessageAttachments(messageId: number): Promise<any[]> {
+    const response = await this.client.get(`/api/v1/attachments/message/${messageId}`)
+    return response.data
+  }
+
+  async getAttachments(params?: {
+    message_id?: number
+    skip?: number
+    limit?: number
+  }): Promise<any> {
+    const response = await this.client.get('/api/v1/attachments', { params })
+    return response.data
+  }
+
+  async deleteAttachment(attachmentId: string): Promise<any> {
+    const response = await this.client.delete(`/api/v1/attachments/${attachmentId}`)
+    return response.data
+  }
+
+  async getAttachmentStats(): Promise<any> {
+    const response = await this.client.get('/api/v1/attachments/stats/overview')
+    return response.data
+  }
+
+  // Helper method to upload multiple attachments
+  async uploadAttachments(files: File[]): Promise<AttachmentUploadResponse[]> {
+    const uploadPromises = files.map(file => this.uploadAttachment(file))
+    return Promise.all(uploadPromises)
+  }
+
+  // Helper method to handle file download
+  async downloadFile(attachmentId: string, filename: string): Promise<void> {
+    try {
+      const blob = await this.downloadAttachment(attachmentId)
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading file:', error)
+      throw error
+    }
+  }
+
+  // Download media from a message (with fallback logic)
+  async downloadMessageMedia(messageId: number, filename?: string): Promise<void> {
+    try {
+      const response = await this.client.get(`/api/v1/attachments/message/${messageId}/download`, {
+        responseType: 'blob'
+      })
+
+      // Get filename from Content-Disposition header or use provided one
+      let downloadFilename = filename || `media_${messageId}`
+      const contentDisposition = response.headers['content-disposition']
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="([^"]+)"/)
+        if (filenameMatch && filenameMatch[1]) {
+          downloadFilename = filenameMatch[1]
+        }
+      }
+
+      // Create download link
+      const url = window.URL.createObjectURL(response.data)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = downloadFilename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error: any) {
+      console.error('Error downloading message media:', error)
+      throw error
+    }
+  }
+
   // Health check
   async healthCheck(): Promise<any> {
     const response = await this.client.get('/health')
+    return response.data
+  }
+
+  // ===== ADMIN-SPECIFIC METHODS =====
+
+  // Admin Dashboard Statistics
+  async getAdminDashboardStats(): Promise<any> {
+    const response = await this.client.get('/api/v1/messages/admin/stats')
+    return response.data
+  }
+
+  // Template Management
+  async getAdminTemplates(params?: { skip?: number; limit?: number; search?: string }): Promise<any[]> {
+    const response = await this.client.get('/api/v1/messages/admin/templates', { params })
+    return response.data
+  }
+
+  async getAdminTemplate(templateId: number): Promise<any> {
+    const response = await this.client.get(`/api/v1/messages/admin/templates/${templateId}`)
+    return response.data
+  }
+
+  async createAdminTemplate(templateData: any): Promise<any> {
+    const response = await this.client.post('/api/v1/messages/admin/templates', templateData)
+    return response.data
+  }
+
+  async updateAdminTemplate(templateId: number, templateData: any): Promise<any> {
+    const response = await this.client.put(`/api/v1/messages/admin/templates/${templateId}`, templateData)
+    return response.data
+  }
+
+  async deleteAdminTemplate(templateId: number): Promise<void> {
+    await this.client.delete(`/api/v1/messages/admin/templates/${templateId}`)
+  }
+
+  // Template Application
+  async applyTemplateToConversation(applicationData: any): Promise<any> {
+    const response = await this.client.post('/api/v1/messages/admin/templates/apply', applicationData)
+    return response.data
+  }
+
+  // User Search
+  async searchUsers(query: string, limit: number = 50): Promise<any[]> {
+    const response = await this.client.get('/api/v1/messages/admin/users/search', {
+      params: { query, limit }
+    })
+    return response.data
+  }
+
+  // Broadcast Messaging
+  async broadcastMessage(broadcastData: any): Promise<any> {
+    const response = await this.client.post('/api/v1/messages/admin/messages/broadcast', broadcastData)
+    return response.data
+  }
+
+  // Enhanced message sending with admin metadata
+  async sendMessageWithAdminMetadata(messageData: any): Promise<any> {
+    const response = await this.client.post('/api/v1/messages/send', messageData)
     return response.data
   }
 }
@@ -268,5 +559,7 @@ export type {
   Conversation,
   SendMessageRequest,
   ConversationStats,
-  MessageStats
+  MessageStats,
+  AttachmentData,
+  AttachmentUploadResponse
 }

@@ -7,10 +7,11 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import {
   ChatBubbleLeftRightIcon,
-  ChartBarIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   HomeIcon,
+  BookOpenIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline'
 
 export default function DashboardLayout({
@@ -42,7 +43,8 @@ export default function DashboardLayout({
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: true },
     { name: 'Conversations', href: '/dashboard/conversations', icon: ChatBubbleLeftRightIcon, current: false },
-    { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, current: false },
+    { name: 'AI Assistant', href: '/dashboard/ai-assistant', icon: SparklesIcon, current: false },
+    { name: 'Knowledge Base', href: '/dashboard/knowledge-base', icon: BookOpenIcon, current: false },
     { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, current: false },
   ]
 
@@ -119,7 +121,7 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 min-h-0">{children}</main>
       </div>
     </div>
   )

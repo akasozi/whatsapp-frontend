@@ -43,7 +43,7 @@ export default function ConversationsPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-gray-50">
+    <div className="flex h-full min-h-0 overflow-hidden bg-gray-50">
       {/* Conversations List - Left Sidebar */}
       <div
         className={`${
