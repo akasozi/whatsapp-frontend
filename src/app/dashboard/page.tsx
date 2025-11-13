@@ -11,7 +11,7 @@ import {
   UserGroupIcon,
   Cog6ToothIcon,
   ChatBubbleLeftRightIcon,
-  TemplateIcon,
+  RectangleStackIcon,
   MegaphoneIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'

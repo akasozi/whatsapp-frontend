@@ -1,15 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import type {
-  AuthTokens,
-  LoginCredentials,
-  User,
-  Message,
-  Conversation,
-  SendMessageRequest,
-  ConversationStats,
-  MessageStats,
-  AttachmentData,
-  AttachmentUploadResponse,
   MessageTemplate,
   MessageTemplateCreate,
   MessageTemplateUpdate,
@@ -19,10 +9,20 @@ import type {
   BroadcastMessageRequest,
   BroadcastResult,
   UserSearchResponse,
-  AdminMessageMetadata
+  AdminMessageMetadata,
+  Document,
+  DocumentChunk,
+  AttachmentUploadResponse,
+  User,
+  Message,
+  Conversation,
+  SendMessageRequest
 } from '@/types'
 
-// Type definitions
+// Re-export types for use in components
+export type { User, Message, Conversation, SendMessageRequest } from '@/types'
+
+// Local type definitions
 interface AuthTokens {
   access_token: string
   token_type: string
@@ -34,56 +34,6 @@ interface LoginCredentials {
   password: string
 }
 
-interface User {
-  id: number
-  phone_number: string
-  full_name: string
-  email?: string
-  role: string
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-interface Message {
-  id: number
-  conversation_id: number
-  sender_id?: number
-  direction: 'INBOUND' | 'OUTBOUND'
-  message_type: string
-  content: string
-  external_message_id?: string
-  media_url?: string
-  media_filename?: string
-  has_attachments: boolean
-  message_metadata: any
-  source: string
-  created_at: string
-  updated_at: string
-}
-
-interface Conversation {
-  id: number
-  session_id: string
-  user_id: number
-  status: 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ARCHIVED'
-  assigned_agent_id?: number
-  last_message_at?: string
-  created_at: string
-  updated_at: string
-  user: User
-  messages: Message[]
-}
-
-interface SendMessageRequest {
-  conversation_id: number
-  content: string
-  message_type?: string
-  media_url?: string
-  media_filename?: string
-  attachments?: AttachmentData[]
-}
-
 interface AttachmentData {
   attachment_id: number
   filename: string
@@ -92,15 +42,7 @@ interface AttachmentData {
   download_url: string
 }
 
-interface AttachmentUploadResponse {
-  message: string
-  attachment_id: number
-  filename: string
-  file_size: number
-  mime_type: string
-  download_url: string
-}
-
+// Type definitions
 interface ConversationStats {
   total_conversations: number
   active_conversations: number
@@ -554,12 +496,7 @@ export const apiClient = ApiClient.getInstance()
 export type {
   AuthTokens,
   LoginCredentials,
-  User,
-  Message,
-  Conversation,
-  SendMessageRequest,
   ConversationStats,
   MessageStats,
-  AttachmentData,
-  AttachmentUploadResponse
+  AttachmentData
 }
