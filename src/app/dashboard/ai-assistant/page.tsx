@@ -12,24 +12,27 @@ export default function AIAssistantPage() {
   // Fetch suggested questions
   const { data: questionsData, isLoading: questionsLoading } = useQuery({
     queryKey: ['ai-assistant-suggested-questions'],
-    queryFn: () => apiClient.getSuggestedQuestions(),
-    onSuccess: (data) => {
+    queryFn: () => apiClient.getSuggestedQuestions()
+  })
+
+  // Process questions data when it changes
+  useEffect(() => {
+    if (questionsData) {
       // Flatten all categories into a single list
       const allQuestions: string[] = []
-      if (data.categories) {
-        Object.values(data.categories).forEach((categoryQuestions: string[]) => {
+      if (questionsData.categories) {
+        Object.values(questionsData.categories).forEach((categoryQuestions: string[]) => {
           allQuestions.push(...categoryQuestions)
         })
-      } else if (data.questions) {
-        allQuestions.push(...data.questions)
+      } else if (questionsData.questions) {
+        allQuestions.push(...questionsData.questions)
       }
       setSuggestedQuestions(allQuestions.slice(0, 8)) // Limit to 8 suggestions
       setIsLoadingQuestions(false)
-    },
-    onError: () => {
+    } else if (!questionsLoading) {
       setIsLoadingQuestions(false)
     }
-  })
+  }, [questionsData, questionsLoading])
 
   return (
     <div className="flex h-full bg-gray-50">

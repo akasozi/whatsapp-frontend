@@ -127,7 +127,7 @@ export default function AIAssistantChat() {
   })
 
   const handleSendMessage = async (content: string) => {
-    if (!content.trim() || chatMutation.isLoading) return
+    if (!content.trim() || chatMutation.isPending) return
 
     chatMutation.mutate(content.trim())
   }
@@ -144,7 +144,7 @@ export default function AIAssistantChat() {
       .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
       .replace(/\n/g, '<br />')
       .replace(/•\s(.+?)(<br \/>|$)/g, '<li class="ml-4">$1</li>')
-      .replace(/(<li.*?<\/li>)/s, '<ul class="list-disc ml-6 space-y-1">$1</ul>')
+      .replace(/(<li.*?<\/li>)/, '<ul class="list-disc ml-6 space-y-1">$1</ul>')
   }
 
   return (
@@ -276,11 +276,11 @@ export default function AIAssistantChat() {
           <div className="flex-1">
             <MessageInput
               onSend={handleSendMessage}
-              disabled={chatMutation.isLoading}
+              disabled={chatMutation.isPending}
               placeholder="Ask me anything about your WhatsApp platform..."
             />
           </div>
-          {chatMutation.isLoading && (
+          {chatMutation.isPending && (
             <button
               onClick={() => {
                 // Cancel the current request
