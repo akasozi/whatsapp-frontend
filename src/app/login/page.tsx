@@ -132,7 +132,7 @@ export default function LoginPage() {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Default credentials: admin@example.com / admin123
+              Default credentials: admin@admin.com / admin123
             </p>
           </div>
         </form>
