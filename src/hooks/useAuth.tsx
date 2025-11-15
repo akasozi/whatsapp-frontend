@@ -51,8 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (credentials: LoginCredentials) => {
     try {
+      console.log('useAuth: Starting login process')
       setIsLoading(true)
+      console.log('useAuth: Calling apiClient.login')
       const tokens = await apiClient.login(credentials)
+      console.log('useAuth: Login API call successful, got tokens')
 
       // For now, we'll set a mock user since we don't have a /me endpoint
       // In a real implementation, you'd get user info from the login response or a separate /me endpoint
@@ -68,13 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUser(mockUser)
+      console.log('useAuth: User state set, showing success toast')
       toast.success('Logged in successfully!')
     } catch (error: any) {
-      console.error('Login failed:', error)
+      console.error('useAuth: Login failed:', error)
       toast.error(error.response?.data?.detail || 'Login failed')
       throw error
     } finally {
       setIsLoading(false)
+      console.log('useAuth: Login process finished')
     }
   }
 

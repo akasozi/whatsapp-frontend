@@ -26,8 +26,11 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginCredentials) => {
     try {
+      console.log('Login form submitted with:', { email: data.email })
       await login(data)
+      console.log('Login successful, should redirect')
     } catch (error) {
+      console.error('Login error in page:', error)
       // Error is handled in the useAuth hook
     }
   }
