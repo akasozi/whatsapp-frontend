@@ -26,6 +26,8 @@ export default function DocumentList({ refreshTrigger, onDocumentClick }: Docume
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; name: string; chunks: number } | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const pageSize = 10
 
@@ -80,13 +82,23 @@ export default function DocumentList({ refreshTrigger, onDocumentClick }: Docume
     }
   }
 
-  const handleDelete = async (documentId: number) => {
-    if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
-      return
+  const handleDeleteClick = (documentId: number) => {
+    const document = documents.find(d => d.id === documentId)
+    if (document) {
+      setDeleteConfirm({
+        id: documentId,
+        name: document.original_filename,
+        chunks: document.total_chunks || 0
+      })
     }
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return
 
     try {
-      setDeletingId(documentId)
+      setDeletingId(deleteConfirm.id)
+      setDeleteConfirm(null)
 
       const token = localStorage.getItem('access_token')
       if (!token) {
@@ -94,7 +106,7 @@ export default function DocumentList({ refreshTrigger, onDocumentClick }: Docume
       }
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/v1/documents/${documentId}`, {
+      const response = await fetch(`${apiUrl}/api/v1/documents/${deleteConfirm.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -104,6 +116,14 @@ export default function DocumentList({ refreshTrigger, onDocumentClick }: Docume
       if (!response.ok) {
         throw new Error('Failed to delete document')
       }
+
+      const result = await response.json()
+
+      // Show success message
+      setSuccessMessage(`Successfully deleted "${result.filename}" and removed ${result.chunks_removed} chunks from RAG memory`)
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSuccessMessage(null), 5000)
 
       // Refresh the list
       fetchDocuments()
@@ -296,7 +316,7 @@ export default function DocumentList({ refreshTrigger, onDocumentClick }: Docume
                           <EyeIcon className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(document.id)}
+                          onClick={() => handleDeleteClick(document.id)}
                           disabled={deletingId === document.id}
                           className="text-gray-600 hover:text-red-600 transition-colors disabled:opacity-50"
                           title="Delete document"
@@ -343,6 +363,61 @@ export default function DocumentList({ refreshTrigger, onDocumentClick }: Docume
             </div>
           )}
         </>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Delete Document
+            </h3>
+            <p className="text-gray-700 mb-4">
+              Are you sure you want to delete <span className="font-semibold">&quot;{deleteConfirm.name}&quot;</span>?
+            </p>
+            <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+              <p className="text-sm text-red-800 font-medium mb-2">This will permanently remove:</p>
+              <ul className="text-sm text-red-700 space-y-1">
+                <li>• The document file</li>
+                <li>• {deleteConfirm.chunks} text chunks</li>
+                <li>• All vector embeddings from RAG memory</li>
+              </ul>
+              <p className="text-sm text-red-800 font-medium mt-2">This action cannot be undone.</p>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 max-w-md">
+          <div className="flex items-start">
+            <svg className="h-5 w-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm">{successMessage}</p>
+            <button
+              onClick={() => setSuccessMessage(null)}
+              className="ml-4 text-white hover:text-gray-200"
+            >
+              ×
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

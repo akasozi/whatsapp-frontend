@@ -250,6 +250,13 @@ export interface MessageTemplate {
   created_by: number
   created_at: string
   updated_at: string
+
+  // WhatsApp Template fields
+  is_whatsapp_template?: boolean
+  whatsapp_template_id?: string
+  whatsapp_template_name?: string
+  template_language?: string
+  template_parameters?: Record<string, any>
 }
 
 export interface MessageTemplateCreate {
@@ -257,6 +264,13 @@ export interface MessageTemplateCreate {
   content: string
   message_type?: string
   attachments_config?: Record<string, any>
+
+  // WhatsApp Template fields
+  is_whatsapp_template?: boolean
+  whatsapp_template_id?: string
+  whatsapp_template_name?: string
+  template_language?: string
+  template_parameters?: Record<string, any>
 }
 
 export interface MessageTemplateUpdate {
@@ -264,6 +278,13 @@ export interface MessageTemplateUpdate {
   content?: string
   message_type?: string
   attachments_config?: Record<string, any>
+
+  // WhatsApp Template fields
+  is_whatsapp_template?: boolean
+  whatsapp_template_id?: string
+  whatsapp_template_name?: string
+  template_language?: string
+  template_parameters?: Record<string, any>
 }
 
 export interface TemplateApplicationRequest {
@@ -348,4 +369,217 @@ export interface AdminMessage extends Message {
   is_template_based?: boolean
   template_id?: number
   template?: MessageTemplate
+}
+
+// User Management Types (Admin Only)
+export interface AdminUserCreate {
+  email: string
+  phone_number: string
+  full_name?: string
+  password: string
+  role?: 'USER' | 'ADMIN'
+  is_active?: boolean
+}
+
+export interface AdminUserUpdate {
+  email?: string
+  phone_number?: string
+  full_name?: string
+  password?: string
+  role?: 'USER' | 'ADMIN'
+  is_active?: boolean
+}
+
+export interface AdminUserResponse {
+  id: number
+  email: string | null
+  phone_number: string
+  full_name?: string
+  role: 'USER' | 'ADMIN'
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminUserListResponse {
+  users: AdminUserResponse[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export interface UserListParams {
+  skip?: number
+  limit?: number
+  search?: string
+  role?: 'USER' | 'ADMIN'
+  is_active?: boolean
+}
+
+// Reports & Analytics Types
+export interface UniqueUsersReport {
+  start_date: string
+  end_date: string
+  unique_users_count: number
+  total_conversations: number
+  total_messages: number
+}
+
+export interface MessageVolumeReport {
+  start_date: string
+  end_date: string
+  total_messages: number
+  inbound_messages: number
+  outbound_messages: number
+  inbound_percentage: number
+  outbound_percentage: number
+}
+
+export interface AgentPerformance {
+  agent_id: number
+  agent_name: string
+  agent_email: string | null
+  conversations_handled: number
+  messages_sent: number
+  average_messages_per_conversation: number
+}
+
+export interface AgentPerformanceReport {
+  start_date: string
+  end_date: string
+  agents: AgentPerformance[]
+  total_agents: number
+}
+
+export interface DashboardSummary {
+  unique_users: UniqueUsersReport
+  message_volume: MessageVolumeReport
+  agent_performance: AgentPerformanceReport
+}
+
+// WhatsApp Template Message Types
+export interface WhatsAppTemplateMessageRequest {
+  template_name: string
+  language?: string
+  recipients: string[]
+  parameters?: Record<string, any>
+}
+
+export interface RecipientResult {
+  phone_number: string
+  status: string
+  message_id?: string
+  error?: string
+}
+
+export interface WhatsAppTemplateMessageResponse {
+  status: string
+  total_recipients: number
+  successful: number
+  failed: number
+  results: RecipientResult[]
+}
+
+// Contacts & Groups
+export interface Contact {
+  id: number
+  phone_number: string
+  full_name?: string
+  email?: string
+  custom_fields?: Record<string, any>
+  is_active: boolean
+  uploaded_by: number
+  import_batch_id?: string
+  created_at: string
+  updated_at: string
+  uploader_name?: string
+  uploader_email?: string
+}
+
+export interface ContactListResponse {
+  contacts: Contact[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export interface ContactGroup {
+  id: number
+  name: string
+  description?: string
+  created_by: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  member_count?: number
+  creator_name?: string
+}
+
+export interface ContactGroupListResponse {
+  groups: ContactGroup[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export interface ContactCreate {
+  phone_number: string
+  full_name?: string
+  email?: string
+  custom_fields?: Record<string, any>
+}
+
+export interface ContactUpdate {
+  phone_number?: string
+  full_name?: string
+  email?: string
+  custom_fields?: Record<string, any>
+}
+
+export interface ContactUploadResponse {
+  batch_id: string
+  total_rows: number
+  successful: number
+  failed: number
+  duplicates: number
+  errors: Array<{
+    row?: number
+    phone_number?: string
+    data?: Record<string, string>
+    error: string
+  }>
+}
+
+export interface ContactStats {
+  total_contacts: number
+  active_contacts: number
+  inactive_contacts: number
+  total_groups: number
+  recent_imports: number
+}
+
+export interface ContactGroupCreate {
+  name: string
+  description?: string
+}
+
+export interface ContactGroupUpdate {
+  name?: string
+  description?: string
+}
+
+export interface BulkMessageResponse {
+  total_recipients: number
+  successful: number
+  failed: number
+  results: Array<{
+    contact_id?: number
+    phone_number: string
+    status: string
+    message_id?: string
+    error?: string
+  }>
 }

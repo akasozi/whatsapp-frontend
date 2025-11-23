@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { CloudArrowUpIcon, DocumentIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { DocumentUploadResponse } from '@/types'
+import { apiClient } from '@/lib/api'
 
 interface PDFUploadProps {
   onUploadSuccess: (response: DocumentUploadResponse) => void
@@ -79,32 +80,12 @@ export default function PDFUpload({ onUploadSuccess, onUploadError }: PDFUploadP
     setUploadProgress(0)
 
     try {
-      const formData = new FormData()
-      formData.append('file', selectedFile)
-      if (title) formData.append('title', title)
-      if (description) formData.append('description', description)
-
-      // Get auth token from localStorage
-      const token = localStorage.getItem('access_token')
-      if (!token) {
-        throw new Error('Authentication required')
-      }
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/api/v1/documents/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Upload failed')
-      }
-
-      const result: DocumentUploadResponse = await response.json()
+      // Use API client for authenticated upload
+      const result: DocumentUploadResponse = await apiClient.uploadDocument(
+        selectedFile,
+        title || undefined,
+        description || undefined
+      )
       onUploadSuccess(result)
 
       // Reset form

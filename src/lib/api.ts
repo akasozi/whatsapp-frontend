@@ -16,11 +16,30 @@ import type {
   User,
   Message,
   Conversation,
-  SendMessageRequest
+  SendMessageRequest,
+  AdminUserCreate,
+  AdminUserUpdate,
+  AdminUserResponse,
+  AdminUserListResponse,
+  UserListParams,
+  UniqueUsersReport,
+  MessageVolumeReport,
+  AgentPerformanceReport,
+  DashboardSummary,
+  WhatsAppTemplateMessageRequest,
+  WhatsAppTemplateMessageResponse,
+  Contact,
+  ContactCreate,
+  ContactUploadResponse,
+  ContactListResponse,
+  ContactGroup,
+  ContactGroupListResponse,
+  ContactGroupCreate,
+  BulkMessageResponse
 } from '@/types'
 
 // Re-export types for use in components
-export type { User, Message, Conversation, SendMessageRequest } from '@/types'
+export type { User, Message, Conversation, SendMessageRequest, Contact, ContactListResponse, ContactGroup, ContactGroupListResponse } from '@/types'
 
 // Local type definitions
 interface AuthTokens {
@@ -32,6 +51,16 @@ interface AuthTokens {
 interface LoginCredentials {
   email: string
   password: string
+}
+
+interface ChangePasswordRequest {
+  current_password: string
+  new_password: string
+  confirm_password: string
+}
+
+interface ChangePasswordResponse {
+  message: string
 }
 
 interface AttachmentData {
@@ -104,6 +133,62 @@ class ApiClient {
     )
   }
 
+    // Contacts API methods
+    async getContacts(params?: { skip?: number; limit?: number; search?: string; is_active?: boolean }): Promise<ContactListResponse> {
+      const response = await this.client.get('/api/v1/contacts', { params })
+      return response.data
+    }
+
+    async createContact(contactData: ContactCreate): Promise<Contact> {
+      const response = await this.client.post('/api/v1/contacts', contactData)
+      return response.data
+    }
+
+    async uploadContactsCSV(file: File): Promise<ContactUploadResponse> {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await this.client.post('/api/v1/contacts/upload-csv', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000
+      })
+
+      return response.data
+    }
+
+    async getContactGroups(params?: { skip?: number; limit?: number; search?: string }): Promise<ContactGroupListResponse> {
+      const response = await this.client.get('/api/v1/contact-groups', { params })
+      return response.data
+    }
+
+    async createContactGroup(groupData: ContactGroupCreate): Promise<ContactGroup> {
+      const response = await this.client.post('/api/v1/contact-groups', groupData)
+      return response.data
+    }
+
+    async addGroupMembers(groupId: number, data: { contact_ids: number[] }): Promise<any> {
+      const response = await this.client.post(`/api/v1/contact-groups/${groupId}/members`, data)
+      return response.data
+    }
+
+    async removeGroupMember(groupId: number, contactId: number): Promise<void> {
+      await this.client.delete(`/api/v1/contact-groups/${groupId}/members/${contactId}`)
+    }
+
+    async getGroupMembers(groupId: number, params?: { skip?: number; limit?: number }): Promise<any> {
+      const response = await this.client.get(`/api/v1/contact-groups/${groupId}/members`, { params })
+      return response.data
+    }
+
+    async sendTemplateToGroup(groupId: number, data: { template_name: string; language?: string; parameters?: any }): Promise<BulkMessageResponse> {
+      const response = await this.client.post(`/api/v1/contact-groups/${groupId}/send-template`, data)
+      return response.data
+    }
+
+    async sendTemplateToContacts(contactIds: number[], data: { template_name: string; language?: string; parameters?: any }): Promise<any> {
+      const response = await this.client.post(`/api/v1/contact-groups/send-template`, { contact_ids: contactIds, ...data })
+      return response.data
+    }
   static getInstance(): ApiClient {
     if (!ApiClient.instance) {
       ApiClient.instance = new ApiClient()
@@ -147,6 +232,11 @@ class ApiClient {
 
   async createAdminUser(): Promise<any> {
     const response = await this.client.post('/api/v1/auth/create-admin')
+    return response.data
+  }
+
+  async changePassword(data: ChangePasswordRequest): Promise<ChangePasswordResponse> {
+    const response = await this.client.post('/api/v1/auth/change-password', data)
     return response.data
   }
 
@@ -424,6 +514,22 @@ class ApiClient {
     }
   }
 
+  // Document endpoints
+  async uploadDocument(file: File, title?: string, description?: string): Promise<any> {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (title) formData.append('title', title)
+    if (description) formData.append('description', description)
+
+    const response = await this.client.post('/api/v1/documents/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 60000, // 60 second timeout for file upload
+    })
+    return response.data
+  }
+
   // Health check
   async healthCheck(): Promise<any> {
     const response = await this.client.get('/health')
@@ -440,7 +546,11 @@ class ApiClient {
 
   // Template Management
   async getAdminTemplates(params?: { skip?: number; limit?: number; search?: string }): Promise<any[]> {
-    const response = await this.client.get('/api/v1/messages/admin/templates', { params })
+    // Filter out empty search parameter to avoid validation errors (backend requires min_length=2)
+    const cleanParams = params ? Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== '' && value !== undefined && value !== null)
+    ) : {}
+    const response = await this.client.get('/api/v1/messages/admin/templates', { params: cleanParams })
     return response.data
   }
 
@@ -483,9 +593,87 @@ class ApiClient {
     return response.data
   }
 
+  // WhatsApp Template Messaging
+  async sendWhatsAppTemplate(requestData: WhatsAppTemplateMessageRequest): Promise<WhatsAppTemplateMessageResponse> {
+    const response = await this.client.post('/api/v1/whatsapp-templates/send', requestData)
+    return response.data
+  }
+
   // Enhanced message sending with admin metadata
   async sendMessageWithAdminMetadata(messageData: any): Promise<any> {
     const response = await this.client.post('/api/v1/messages/send', messageData)
+    return response.data
+  }
+
+  // ===== USER MANAGEMENT METHODS (ADMIN ONLY) =====
+
+  // Create a new user
+  async createUser(userData: AdminUserCreate): Promise<AdminUserResponse> {
+    const response = await this.client.post('/api/v1/admin/users', userData)
+    return response.data
+  }
+
+  // Get all users with pagination and filtering
+  async getUsers(params?: UserListParams): Promise<AdminUserListResponse> {
+    const response = await this.client.get('/api/v1/admin/users', { params })
+    return response.data
+  }
+
+  // Get a single user by ID
+  async getUser(userId: number): Promise<AdminUserResponse> {
+    const response = await this.client.get(`/api/v1/admin/users/${userId}`)
+    return response.data
+  }
+
+  // Update a user
+  async updateUser(userId: number, updates: AdminUserUpdate): Promise<AdminUserResponse> {
+    const response = await this.client.put(`/api/v1/admin/users/${userId}`, updates)
+    return response.data
+  }
+
+  // Deactivate a user (soft delete)
+  async deactivateUser(userId: number): Promise<{ message: string; user_id: number }> {
+    const response = await this.client.delete(`/api/v1/admin/users/${userId}`)
+    return response.data
+  }
+
+  // Reactivate a deactivated user
+  async activateUser(userId: number): Promise<{ message: string; user_id: number }> {
+    const response = await this.client.post(`/api/v1/admin/users/${userId}/activate`)
+    return response.data
+  }
+
+  // ==================== Reports & Analytics ====================
+
+  // Get unique users report for a date range
+  async getUniqueUsersReport(startDate: string, endDate: string): Promise<UniqueUsersReport> {
+    const response = await this.client.get('/api/v1/reports/unique-users', {
+      params: { start_date: startDate, end_date: endDate }
+    })
+    return response.data
+  }
+
+  // Get message volume report (inbound/outbound)
+  async getMessageVolumeReport(startDate: string, endDate: string): Promise<MessageVolumeReport> {
+    const response = await this.client.get('/api/v1/reports/message-volume', {
+      params: { start_date: startDate, end_date: endDate }
+    })
+    return response.data
+  }
+
+  // Get agent performance report
+  async getAgentPerformanceReport(startDate: string, endDate: string): Promise<AgentPerformanceReport> {
+    const response = await this.client.get('/api/v1/reports/agent-performance', {
+      params: { start_date: startDate, end_date: endDate }
+    })
+    return response.data
+  }
+
+  // Get complete dashboard summary
+  async getDashboardSummary(startDate: string, endDate: string): Promise<DashboardSummary> {
+    const response = await this.client.get('/api/v1/reports/dashboard-summary', {
+      params: { start_date: startDate, end_date: endDate }
+    })
     return response.data
   }
 }

@@ -12,7 +12,29 @@ import {
   HomeIcon,
   BookOpenIcon,
   SparklesIcon,
+  UsersIcon,
+  ChartBarIcon,
+  UserCircleIcon,
+  UserGroupIcon,
+  DocumentDuplicateIcon,
+  PhoneIcon,
 } from '@heroicons/react/24/outline'
+import WebChatWidget from '@/components/WebChatWidget'
+
+console.log('ChatBubbleLeftRightIcon', ChatBubbleLeftRightIcon);
+console.log('Cog6ToothIcon', Cog6ToothIcon);
+console.log('ArrowRightOnRectangleIcon', ArrowRightOnRectangleIcon);
+console.log('HomeIcon', HomeIcon);
+console.log('BookOpenIcon', BookOpenIcon);
+console.log('SparklesIcon', SparklesIcon);
+console.log('UsersIcon', UsersIcon);
+console.log('ChartBarIcon', ChartBarIcon);
+console.log('UserCircleIcon', UserCircleIcon);
+console.log('UserGroupIcon', UserGroupIcon);
+console.log('DocumentDuplicateIcon', DocumentDuplicateIcon);
+console.log('PhoneIcon', PhoneIcon);
+console.log('WebChatWidget', WebChatWidget);
+console.log('Link', Link);
 
 export default function DashboardLayout({
   children,
@@ -43,8 +65,14 @@ export default function DashboardLayout({
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: true },
     { name: 'Conversations', href: '/dashboard/conversations', icon: ChatBubbleLeftRightIcon, current: false },
+    { name: 'Agent Handoffs', href: '/dashboard/agent-handoffs', icon: UserGroupIcon, current: false },
     { name: 'AI Assistant', href: '/dashboard/ai-assistant', icon: SparklesIcon, current: false },
     { name: 'Knowledge Base', href: '/dashboard/knowledge-base', icon: BookOpenIcon, current: false },
+    { name: 'Templates', href: '/dashboard/templates', icon: DocumentDuplicateIcon, current: false },
+    { name: 'Reports', href: '/dashboard/reports', icon: ChartBarIcon, current: false },
+    { name: 'Users', href: '/dashboard/users', icon: UsersIcon, current: false },
+    { name: 'Contacts', href: '/dashboard/contacts', icon: PhoneIcon, current: false },
+    { name: 'Account', href: '/dashboard/account', icon: UserCircleIcon, current: false },
     { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, current: false },
   ]
 
@@ -123,6 +151,9 @@ export default function DashboardLayout({
 
         <main className="flex-1 min-h-0">{children}</main>
       </div>
+
+      {/* Web Chat Widget */}
+      {/* <WebChatWidget /> */}
     </div>
   )
 }

@@ -9,6 +9,8 @@ export function Providers({ children }: { children: ReactNode }) {
       queries: {
         retry: 1,
         refetchOnWindowFocus: false,
+        staleTime: 30000, // Data stays fresh for 30 seconds
+        gcTime: 300000, // Keep unused data in cache for 5 minutes
       },
     },
   }))
