@@ -153,7 +153,7 @@ export default function DashboardLayout({
       </div>
 
       {/* Web Chat Widget */}
-      {/* <WebChatWidget /> */}
+      <WebChatWidget />
     </div>
   )
 }

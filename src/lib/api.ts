@@ -144,6 +144,20 @@ class ApiClient {
       return response.data
     }
 
+    async getContact(contactId: number): Promise<Contact> {
+      const response = await this.client.get(`/api/v1/contacts/${contactId}`)
+      return response.data
+    }
+
+    async updateContact(contactId: number, contactData: Partial<ContactCreate>): Promise<Contact> {
+      const response = await this.client.put(`/api/v1/contacts/${contactId}`, contactData)
+      return response.data
+    }
+
+    async deleteContact(contactId: number): Promise<void> {
+      await this.client.delete(`/api/v1/contacts/${contactId}`)
+    }
+
     async uploadContactsCSV(file: File): Promise<ContactUploadResponse> {
       const formData = new FormData()
       formData.append('file', file)
